@@ -1,0 +1,13 @@
+---
+
+- name: Install Apache Web Server
+  hosts: all
+  become: yes
+
+  tasks:
+  - name: Install Apache srvr
+    apt: name=apache2 state=present
+
+
+  - name: Start Apache and enable it on the every boot
+    service: name=apache2 state=started enabled=yes

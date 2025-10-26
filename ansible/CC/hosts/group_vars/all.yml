@@ -1,0 +1,32 @@
+---
+tomcat:
+  env: "{{ test_env }}"
+  owner: ccadmin
+  group: ccadmin
+  process: 'Dgw.cc.env="{{ test_env }}"'
+  log:
+    dest: logs
+    name: catalina.out
+    start_failed: "ClaimCenter unable to start"
+    start_success: "ClaimCenter ready"
+    rotatedest: "/etc/logrotate.d/cc_{{ test_env }}"
+  war:
+    dest: webapps
+    name: cc
+  temp_folder: /tmp
+maven_artifact:
+      artifactory_url: https://artifactory.skillbox/artifactory
+      username: testuser
+      repository_name: test-local
+      dest: ./
+      password: xxxxxxxx
+
+max_wait_time: 36000 
+strings_count: 100
+sudo_pass: !vault |
+          $ANSIBLE_VAULT;1.1;AES256
+          34633765323662393564633632336365303036653164353537383766343565653564346331663936
+          3063393037383766383738366663356266663861326365620a636561386439616639333837343032
+          38666330346661376232343939393035333564393631396131623165353062393633303561356235
+          6539653232323666350a313362323131313537393366306338393938613339363563643838623934
+          3938

@@ -1,0 +1,5 @@
+tomcat:
+  systemd_name: CC_DEVOPS_tomcat
+  home: "/app/cc_{{ test_env }}"
+  web:
+    cc-url: http://test-devops-qa.skillbox:8081/cc/ClaimCenter.do

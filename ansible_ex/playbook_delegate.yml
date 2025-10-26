@@ -1,0 +1,60 @@
+---
+
+- name: My Super Playbook
+  hosts: all
+  become: yes
+  
+  vars:
+    mytext: "Privet test"
+
+
+  tasks:
+
+  - name: Ping test
+    ping:
+
+  - name: Unregister server from Load Balancer
+    shell: echo This server {{ inventory_hostname }} was deregistered, node name of this server {{ ansible_default_ipv4.address }} >> /home/log.txt
+    delegate_to: 127.0.0.1
+
+
+  - name: Create file1
+    copy:
+      dest: /home/file_delegate.txt
+      content: |
+        This is File delegate
+        On English Hello
+        On Rus {{ mytext }}
+    delegate_to: sfirst
+
+  - name: Create file2
+    copy:
+      dest: /home/file_delegate2.txt
+      content: |
+        This is File delegate
+        On English Hello
+        On Rus {{ mytext }}
+
+  - name: Reboot my servers
+    shell: sleep 3 && reboot now
+    async: 1
+    poll: 0
+  
+  - name: Waiting till my servers will come up online
+    wait_for:
+      host: "{{ ansible_default_ipv4.address }}"
+      state: started
+      delay: 5
+      timeout: 40
+    delegate_to: 127.0.0.1
+
+
+
+
+
+
+
+
+
+
+

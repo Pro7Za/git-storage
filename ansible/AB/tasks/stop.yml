@@ -1,0 +1,17 @@
+---
+- name: Checking if ab Tomcat server is running
+  shell: ps -ef | grep "{{ tomcat.process }}" | grep -v grep | grep -v /bin/sh | awk '{print $2}'
+  register: running_proccesses
+
+- name: Stop ab Tomcat service if it is running
+  systemd:
+    state: stopped
+    name: "{{ tomcat.systemd_name }}"
+  become: true
+  register: state
+  ignore_errors: true
+
+- name: Kill Tomcat serivce
+  shell: "kill {{ item }}"
+  with_items: "{{ running_proccesses.stdout_lines }}"
+  ignore_errors: true

@@ -1,0 +1,55 @@
+---
+# tasks file for deploy_apache_web
+
+
+- name: Check OS of our servers
+  debug: var=ansible_os_family
+
+- block: #=========Block for RedHat=========
+
+   - name: Install Nginx/Apache Web Server for RedHat OS
+     yum: name=httpd state=present
+
+
+   - name: Start Webservers and make it enable on boot on RedHat
+     service: name=httpd state=started enabled=yes
+
+  when: ansible_os_family == "RedHat"
+
+
+- block: #========Block for Debian==========
+
+   - name: Install Nginx Web Server for Debian OS
+     apt: name=nginx state=present
+
+
+   - name: Start Webservers and make it enable on boot on Debian
+     service: name=nginx state=started enabled=yes
+
+  when: ansible_os_family == "Debian"
+
+- name: Generate INDEX.HTML file
+  template: src=index.j2 dest={{ destin_folder }}/index.html  mode=0555
+  notify:
+    - Restart Apache RedHat
+    - Restart Nginx
+
+- name: Copy myhomepage to servers RedHat
+  #copy: src={{ source_file }} dest={{ destin_file }}  mode=0555
+  copy:
+    src: "{{ item }}"
+    #src: "{{ source_folder }}/{{ item }}"
+    dest: "{{ destin_folder }}"
+    mode: 0555
+
+#  with_fileglob: "{{ *.* }}"
+  loop:
+ #   - "index.html"
+    - "3185d3e6f4075be2add9a3910016f5e3.jpg"
+    - "bird-colorful-gradient-design-vector_343694-2506.avif"
+    - "images.jpeg"
+    - "PNG_transparency_demonstration_1.png"
+  notify:
+     - Restart Apache RedHat
+     - Restart Nginx
+

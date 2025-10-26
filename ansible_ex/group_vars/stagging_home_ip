@@ -1,0 +1,5 @@
+---
+
+ansible_user:              sfirst   
+ansible_ssh_privete_key:   /home/sfirst/.ssh/authorized_keys
+owner:                     also ME

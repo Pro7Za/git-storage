@@ -1,0 +1,60 @@
+---
+
+- name: Install Nginx and Upload my web page-site
+  hosts: all
+  become: yes
+
+  vars:
+    source_file: ./Mysite/index.html
+    destin_file: /var/www/html
+
+  tasks:
+
+  - name: Check OS of our servers
+    debug: var=ansible_os_family
+
+  - block: #=========Block for RedHat=========
+
+     - name: Install Nginx/Apache Web Server for RedHat OS
+       yum: name=httpd state=present
+
+     - name: Copy myhomepage to servers RedHat
+       #copy: src={{ source_file }} dest={{ destin_file }}  mode=0555
+       copy:
+         src: "{{ source_file }}"
+         dest: "{{ destin_file }}"
+       notify: Restart Apache RedHat 
+
+     - name: Start Webservers and make it enable on boot on RedHat
+       service: name=httpd state=started enabled=yes
+   
+    when: ansible_os_family == "RedHat"
+
+
+  - block: #========Block for Debian==========
+    
+     - name: Install Nginx Web Server for Debian OS
+       apt: name=nginx state=present
+       
+
+
+     - name: Copy myhomepage to servers Debian
+       #copy: src={{ source_file }} dest={{ destin_file }}  mode=0555
+       copy:
+         src: "{{ source_file }}"
+         dest: "{{ destin_file }}"
+       notify: Restart Nginx  
+
+     - name: Start Webservers and make it enable on boot on Debian
+       service: name=nginx state=started enabled=yes
+    
+    when: ansible_os_family == "Debian"
+
+  handlers:
+  - name: Restart Nginx
+    service: name=nginx state=restarted
+  
+  - name: Restart Apache RedHat
+    service: name=httpd state=restarted
+
+

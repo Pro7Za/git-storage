@@ -1,0 +1,45 @@
+---
+- name: Check & install AppD programm
+  package_facts:
+    manager: "auto"
+
+- name: AppD_MA is install
+  debug:
+    msg: "AppD Machine-Agent is INSTALLED"
+  when: "'appdynamics-machine-agent' in ansible_facts.packages"
+
+- name: AppD_MA is not install
+  debug:
+    msg: "AppD Machine-Agent is NOT INSTALLED"
+  when: "'appdynamics-machine-agent' not in ansible_facts.packages"
+
+- name: downloading AppD rpm
+  get_url:
+    url: "http://artifactory.skillbox:8081/artifactory/appdynamics-local/x86_64/appdynamics-machine-agent-4.5.14.2293.x86_64.rpm"
+    url_username: "{{ maven_artifact.username }}"
+    url_password: "{{ maven_artifact.password }}"
+    dest: "/tmp/"
+  when: "'appdynamics-machine-agent' not in ansible_facts.packages"
+
+- name: install AppD from artifactory
+  yum:
+    name: "/tmp/appdynamics-machine-agent-4.5.14.2293.x86_64.rpm"
+    state: present
+  become: true
+  when: "'appdynamics-machine-agent' not in ansible_facts.packages"
+
+- name: restart AppD MA_service
+  systemd:
+    state: restarted
+    name: appdynamics-machine-agent
+  become: true
+  when: "'appdynamics-machine-agent' not in ansible_facts.packages"
+
+- name: copy AppD config file
+  template:
+    src: template/appd_config.j2
+    dest: "/opt/appdynamics/machine-agent/conf/controller-info.xml"
+    owner: root
+    group: root
+    mode: '600'
+  when: "'appdynamics-machine-agent' not in ansible_facts.packages"

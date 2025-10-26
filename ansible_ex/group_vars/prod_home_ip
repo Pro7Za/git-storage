@@ -1,0 +1,6 @@
+---
+
+ansible_user           :   ssecond
+ansible_ssh_private_key:   /home/ssecond/.ssh/authorized_keys
+enviroment             :   Production
+owner                  :   ME            

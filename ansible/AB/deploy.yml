@@ -1,0 +1,10 @@
+---
+- hosts: all
+  any_errors_fatal: true
+  serial: 10
+  tasks:
+    - import_tasks: tasks/appd.yml
+    - import_tasks: tasks/start.yml
+      when: servrole is search ("batch")
+    - import_tasks: tasks/start.yml
+      when: servrole is not search ("batch")

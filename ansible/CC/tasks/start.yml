@@ -1,0 +1,95 @@
+---
+- name: Remove old application files
+  file:
+     path: "{{ tomcat.home }}/{{ tomcat.war.dest }}/{{ tomcat.war.name }}.war"
+     state: absent
+
+- name: delete dir application
+  file:
+    dest: "{{ tomcat.home }}/{{ tomcat.war.dest }}/{{ tomcat.war.name }}"
+    state: absent
+  
+-  name: downloading new war file (local)
+   get_url:
+       url: "{{ maven_artifact.artifactory_url }}/{{  maven_artifact.repository_name }}/{{ branch }}/{{ release_version }}/{{ tomcat.war.name }}.war"
+       url_username: "{{ maven_artifact.username }}"
+       url_password: "{{ maven_artifact.password }}"
+       dest: "{{ maven_artifact.dest }}/{{ tomcat.war.name }}.war"
+   delegate_to: localhost
+
+- name: Copy cc application WAR file to host
+  copy:
+     src:  "{{ tomcat.war.name }}.war"
+     dest: "{{ tomcat.home }}/{{ tomcat.war.dest }}"
+     owner: "{{ tomcat.owner }}"
+     group: "{{ tomcat.group }}"
+
+
+- name: copy logrotate rule
+  template:
+    src: template/logrotate.j2
+    dest: "{{ tomcat.log.rotatedest }}"
+    owner: root
+    group: root
+
+- name: rotating current catalina log
+  command: logrotate -f "{{ tomcat.log.rotatedest }}"
+  ignore_errors: true
+
+- name: Start cc Tomcat service 
+  systemd:
+     state: started
+     name: "{{ tomcat.systemd_name }}"
+  become: true
+  register: state
+  ignore_errors: true
+
+- name: waiting for ready
+  wait_for: 
+    path: "{{ tomcat.home }}/{{ tomcat.log.dest }}/{{ tomcat.log.name }}"
+    search_regex: "{{ tomcat.log.start_success }}|{{ tomcat.log.start_failed }}"
+    timeout: "{{ max_wait_time }}"
+
+- name: head catalina.out
+  command: "head -400 {{ tomcat.home }}/{{ tomcat.log.dest }}/{{ tomcat.log.name }}"
+  register: result_cat
+  run_once: true
+  
+- name: Print catalina.out
+  debug:
+    msg: "{{ result_cat.stdout.split('\n') }}"
+  when: result_cat is changed
+
+- name: Grep catalina.out 
+  command: "grep -C {{ strings_count }} \"{{ tomcat.log.start_failed }}\" {{ tomcat.home }}/{{ tomcat.log.dest }}/{{ tomcat.log.name }}"
+  register: result_grep
+  failed_when: result_grep.stdout != "" 
+
+- name: send mail
+  mail:
+    host='carbon.skillbox'
+    port=25
+    headers="Content-type=text/html"
+    to="Technical support <test_devops@skillbox>"
+    subject='deploy PROD successful build.'
+    from="bamboo@cc-build.tc.skillbox"
+  when: inventory_hostname in groups['prod8_node']
+  ignore_errors: true
+  run_once: true
+
+
+#- name: Reading the ab log for tomcat deployment
+#  raw: 'grep -m 1 \"{{ tomcat.log.start_sucess }}\" <(tail -f -n 0 {{ tomcat.home }}/logs/catalina.out)'
+#  register: search_result
+
+#- name: Checking ab Tomcat web page
+#  uri:
+#    url: "{{ tomcat.web.ab_url }}"
+#    timeout: 60
+#    register: uri_status
+#    failed_when: uri_status.status != 200
+#  when: search_result.stdout is search("ContactManager ready")
+#
+#- fail:
+#   msg: "Deploy failed! ContactManager unable to start!"
+#  when: search_result.stdout is search("ContactManager unable to start")

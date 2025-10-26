@@ -1,0 +1,12 @@
+{{ tomcat.home }}/{{ tomcat.log.dest }}/{{tomcat.log.name}}
+ {
+   rotate 7
+   daily
+   compress
+   notifempty
+   missingok
+   copytruncate
+   dateext
+   dateformat -%Y-%m-%d-%s
+   su {{ tomcat.owner }} {{ tomcat.group }}
+}

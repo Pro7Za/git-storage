@@ -1,0 +1,5 @@
+tomcat:
+  systemd_name: AB_DEVOPS_tomcat                                        #Привести к типовому виду.
+  home: "/app/ab_{{ test_env }}"
+  web:
+    ab_url: http://test-devops-qa.skillbox:7071/	  # для всех сред, уникальная, задать  лучше в group vars
