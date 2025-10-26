@@ -1,0 +1,104 @@
+stages:
+  - build
+  - test
+  - deploy
+  - deploy_sec
+
+variables:
+  docker_path: "/home/ubuntu"
+  env: prod
+  deploy_subfolder: skillbox
+
+before_script:
+  #- echo "$ANSIBLE_SSHKEY" > ./ansible.key
+  #- export ANSIBLE_CONFIG=/builds/devops-exr/service/ansible.cfg
+
+build image:
+  image: docker
+  stage: build
+  services:
+    - docker:dind
+  script:
+    ##- unset DOCKER_HOST
+    ##- docker login $CI_REGISTRY -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD
+    - echo $CI_REGISTRY_PASSWORD | docker login -u $CI_REGISTRY_USER $CI_REGISTRY --password-stdin
+    - docker build --file Dockerfile -t $CI_REGISTRY_IMAGE .
+    - docker push $CI_REGISTRY_IMAGE
+  when: manual
+  ##tags:
+    ##- docker
+
+
+build:
+  #image: $CI_REGISTRY_IMAGE
+  stage: test
+  #services:
+    #- docker:dind
+  script:
+    - ls -ld $PWD/*
+    #- cd ~/service
+    #- docker run -p 8080:8080 $CI_REGISTRY_IMAGE
+    - ./run-tests.sh
+  
+  when: manual
+  tags:
+    #- docker
+    - newshell
+
+
+deploy:
+  image: $CI_REGISTRY_IMAGE
+  stage: deploy
+  #services:
+    #- name: $CI_REGISTRY_IMAGE
+  script:
+    #- echo $ANSIBLE_VAULT_PASSWORD > .vault_password.txt
+    #- apk add ansible
+    #- apk update
+    #- apk add busybox-extras
+      #- docker run -p 8080:8080 $CI_REGISTRY_IMAGE
+    #- ansible --version
+    - pwd
+    #- ls -la
+    #- chmod 400 id_rsa
+    #- ls -ld $PWD/*
+    #- busybox-extras telnet 130.193.36.214 22
+    #- cd ~/service
+    #- git checkout uat
+    #- ansible reactjs_servers -m ping
+    - ansible-playbook -vvv -i hosts_t startdocker.yaml
+    #- apk add curl
+    #- curl http://$CI_REGISTRY_IMAGE:8080/status | grep "UP"
+  #when: manual
+  tags:
+    - newshell
+
+    
+deploy_sec:
+  image: $CI_REGISTRY_IMAGE
+  stage: deploy_sec
+  #services:
+    #- name: $CI_REGISTRY_IMAGE
+  script:
+    #- echo $ANSIBLE_VAULT_PASSWORD > .vault_password.txt
+    #- apk add ansible
+    #- apk update
+    #- apk add busybox-extras
+      #- docker run -p 8080:8080 $CI_REGISTRY_IMAGE
+    #- ansible --version
+    - pwd
+    #- ls -la
+    #- chmod 400 id_rsa
+    #- ls -ld $PWD/*
+    #- busybox-extras telnet 130.193.36.214 22
+    #- cd ~/service
+    #- git checkout main
+    #- ansible reactjs_servers -m ping
+    - ansible-playbook -vvv -i hosts startdocker.yaml
+    #- apk add curl
+    #- curl http://$CI_REGISTRY_IMAGE:8080/status | grep "UP"
+  tags:
+    - dshell
+  only:
+    - uat
+    

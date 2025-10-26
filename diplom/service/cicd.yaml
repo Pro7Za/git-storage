@@ -1,0 +1,27 @@
+---
+- hosts: all
+  vars_files:
+    - ./variables.yaml
+  become: yes
+  gather_facts: false
+  tasks:
+  #- name: Install gitlab runner
+  #  shell: |
+   #   curl -L "https://packages.gitlab.com/install/repositories/runner/gitlab-runner/script.deb.sh" | sudo bash
+ # - name: Install gitlab runner
+  #  command: sudo apt install gitlab-runner
+
+  - name: Register gitlab docker runner
+    command: |
+      gitlab-runner register \
+      --non-interactive \
+      --url "https://gitlab.com/" \
+      --registration-token $REG_TOKEN \
+      --executor "docker" \
+      --docker-image alpine:latest \
+      --description "docker-runner" \
+      --tag-list "docker" \
+      --run-untagged="false" \
+      --locked="true" \
+      --access-level="ref_protected"
+

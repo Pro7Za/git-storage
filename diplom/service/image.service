@@ -1,0 +1,12 @@
+[Unit]
+Description=Start image
+After=docker.service
+
+[Service]
+Restart=always
+EnviromentFile=/home/ubuntu/skillbox/server/template.conf
+ExecStart=/usr/bin/docker start -a ${SKILLBOXIMAGE}
+
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,30 @@
+---
+- hosts: all
+
+  vars:
+    project_path: /home/ubuntu
+    repositiry: https://github.com/bhavenger/skillbox-diploma.git
+
+
+  tasks:
+    
+    - name: Copy systemd
+      ansible.builtin.template:
+        src: ./image.service
+        dest: /etc/systemd/system
+        mode: '0644'
+        
+    - name: Copy conf
+      ansible.builtin.template:
+        src: ./template.conf
+        dest: /etc/systemd/system
+        mode: '0644'
+      
+    #- name: Go to folder skillbox and run tests
+    #  command: chdir=/home/ubuntu/skillbox/ ./run-tests.sh
+    
+    #- name: Build 
+    #  command: chdir=/home/ubuntu/skillbox/ docker-compose build
+      
+    #- name: Start project 
+    #  command: chdir=/home/ubuntu/skillbox/ docker-compose up

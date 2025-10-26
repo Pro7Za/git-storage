@@ -1,0 +1,59 @@
+---
+- hosts: all
+  vars:
+    project_path: /home/ubuntu
+    repositiry: https://github.com/bhavenger/skillbox-diploma.git
+  become: yes
+  gather_facts: false
+  tasks:
+  - name: Install docker packages
+    remote_user: ansible_ubuntu_demo
+    apt:
+      name: ['apt-transport-https','ca-certificates', 'curl', 'software-properties-common']
+      state: present
+      update_cache: yes
+    tags:
+      - docker
+  - name: Add Docker s GPG key for ubuntu from official site
+    remote_user: ansible_ubuntu_demo
+    apt_key:
+      url: https://download.docker.com/linux/ubuntu/gpg
+      state: present
+    tags:
+      - docker
+  - name: Verify gpg key with the fingerprint
+    remote_user: ansible_ubuntu_demo
+    apt_key:
+      id: 0EBFCD88
+      state: present
+    tags:
+      - docker
+  - name: Configure Docker for ubuntu stable repository
+    remote_user: ansible_ubuntu_demo
+    apt_repository:
+       repo: deb [arch=$(dpkg --print-architecture)] https://download.docker.com/linux/ubuntu focal stable
+       state: present
+       update_cache: yes
+    tags:
+      - docker
+  - name: Update apt packages
+    remote_user: ansible_ubuntu_demo
+    apt:
+      update_cache: yes
+    tags:
+      - docker
+  - name: Install Docker.
+    package:
+      name: docker-ce
+      state: present
+    become: true
+  
+  - name: Add "ansible_ubuntu_demo" user to "docker" group
+    remote_user: ansible_ubuntu_demo
+    user:
+      name: "ansible_ubuntu_demo"
+      group: "docker"
+      append: yes
+    tags:
+      - docker
+

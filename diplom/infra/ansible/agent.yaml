@@ -1,0 +1,41 @@
+---
+- hosts: grafana
+  vars:
+    project_path: /home/ubuntu
+    repositiry: https://github.com/bhavenger/skillbox-diploma.git
+    ansible_python_interpreter: /usr/bin/python3
+  become: yes
+  gather_facts: false
+  tasks:
+  - name: ADD agent
+    yum_repository:
+      name: fluent-bit
+      description: fluent-bit
+      baseurl: https://packages.fluentbit.io/ubuntu/$releaserver/
+      gpgkey: https://packages.fluentbit.io/fluentbit.key
+      gpgcheck: true
+      repo_gpgcheck: true
+      enabled: true
+      
+ # - name: Install fluent-bit
+    #package:
+    #  name: fluent-bit
+     # state: present
+   # become: true
+  
+  - name: Install td-agent-bit
+    package:
+      name: td-agent-bit
+      state: present
+    become: true
+   
+  - name: check
+    command: systemctl status {{ item }}
+    with_items:
+    - td-agent-bit
+    register: result
+    ignore_errors: yes
+  - name: show report
+    debug:
+      var: result  
+    

@@ -1,0 +1,2 @@
+[reactjs_servers]
+diplom ansible_host=130.193.36.214 ansible_user=ubuntu ansible_ssh_private_key=/home/ubuntu/.ssh/authorized_keys

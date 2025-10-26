@@ -1,0 +1,16 @@
+---
+- hosts: grafana
+  vars:
+    project_path: /home/ubuntu
+    repositiry: https://github.com/bhavenger/skillbox-diploma.git
+  become: yes
+  gather_facts: false
+  tasks:
+  - name: Install prometheus
+    apt:
+      name: "{{ item }}"
+      state: present
+    with_items:
+      - prometheus
+      - prometheus-node-exporter
+      - prometheus-alertmanager

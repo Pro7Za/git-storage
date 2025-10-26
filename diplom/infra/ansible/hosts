@@ -1,0 +1,7 @@
+[reactjs_servers]
+reactjs_1 ansible_host=130.193.36.214 ansible_user=ubuntu ansible_ssh_private_key=~/.ssh/id_rsa
+
+
+[grafana]
+grafana ansible_host=158.160.124.34 ansible_user=ubuntu ansible_ssh_private_key=~/.ssh/id_rsa
+
