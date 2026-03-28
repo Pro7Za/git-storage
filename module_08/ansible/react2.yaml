@@ -1,0 +1,10 @@
+---
+- hosts: reactjs_servers
+  gather_facts: false
+  become: true
+
+  vars:
+    project_path: /var/www
+    repositiry: https://gitlab.com/devops-exr/bluegreen.git
+  roles:
+    - role: "/home/name/module_08/roles/reactapp"

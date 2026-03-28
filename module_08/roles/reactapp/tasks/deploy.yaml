@@ -1,0 +1,55 @@
+- name: Create project path
+  file:
+    dest={{ project_path }}
+    mode=0755
+    recurse=yes
+    state=directory
+
+- name: Set some variable
+  set_fact:
+    release_path: "{{ project_path }}/releases/{{ lookup('pipe','date +%Y%m%d%H%M%S') }}"
+    current_path: "{{ project_path }}/html"
+  tags: start_yarn
+
+- name: Create Release folder
+  file:
+    dest={{ release_path }}
+    mode=0755
+    recurse=yes
+    state=directory
+
+- name: Clone the repository
+  git:
+    repo: "{{ repositiry }}"
+    dest: "{{ release_path }}"
+
+- name: Add IP address of instance to main site
+  replace:
+    path: "{{ release_path }}/src/App.js"
+    regexp: 'Test of revert'
+    replace: 'HELLO!'
+    #replace: '{{ ansible_default_ipv4.address }}'
+    backup: yes
+
+- name: Install packages based on package.json.
+  npm:
+    path: "{{ release_path }}"
+
+- name: YARN install
+  command: "yarn install"
+  args:
+    chdir: "{{ release_path }}"
+
+- name: Yarn Build
+  command: "yarn build"
+  args:
+    chdir: "{{ release_path }}"
+      #environment:
+      #REACT_APP_WEBSITE_PREFIX: Evgeniy Lastovka
+
+- name: Update Symlink
+  file:
+    src={{ release_path }}/build
+    dest={{ current_path }}
+    state=link
+

@@ -1,0 +1,5 @@
+[nginx_servers]
+nginx_1 ansible_host=84.201.156.22 ansible_user=nginx ansible_ssh_private_key=~/.ssh/id_rsa
+#nginx_2 ansible_host=192.168.10.22 ansible_user=nginx ansible_ssh_private_key=~/.ssh/id_rsa
+[reactjs_servers]
+reactjs_1 ansible_host=178.154.221.84 ansible_user=ubuntu ansible_ssh_private_key=~/.ssh/id_rsa

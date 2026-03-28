@@ -1,0 +1,4 @@
+---
+# tasks file for reactapp
+- include_tasks: instll.yaml
+- include_tasks: deploy.yaml
